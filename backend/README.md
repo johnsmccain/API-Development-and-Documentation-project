@@ -71,13 +71,14 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 
 You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
 
-### Documentation Example
+### Documentation:
 
-`GET '/api/v1.0/categories'`
+`GET '/categories'`
 
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
 - Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
+- Example: http://localhost:5000/categories
 
 ```json
 {
@@ -89,7 +90,186 @@ You will need to provide detailed documentation of your API endpoints including 
   "6": "Sports"
 }
 ```
+  ### `GET '/categories/<int:categories_id>/questions'`
+  
+  - Return a list questions with a given category
+  - Results are paginated in groups of 10.
+  - Sample http://localhost:5000//categories/2/questions
+```json
+{
+    "current_category": "Art",
+    "questions": [
+        {
+            "answer": "Mona Lisa",
+            "category": "2",
+            "difficulty": 3,
+            "id": 17,
+            "question": "La Giaconda is better known as what?"
+        },
+        {
+            "answer": "hsjdh",
+            "category": "2",
+            "difficulty": 4,
+            "id": 24,
+            "question": "njasdkjskadjka"
+        }
+    ],
+    "success": true,
+    "total_questions": 2
+}
+```
+### `GET '/questions'`
+- General:
+  - Returns a list of questions, categories, success value and total_questions
+  - Result are paginated in groups of 10. Include a request argument to choose page number, starting from 1,
+  - Sample: http://localhost:5000/questions
+```json
+{
+    "categories": [
+        {
+            "id": 1,
+            "type": "Science"
+        },
+        {
+            "id": 2,
+            "type": "Art"
+        },
+        {
+            "id": 3,
+            "type": "Geography"
+        },
+        {
+            "id": 4,
+            "type": "History"
+        },
+        {
+            "id": 5,
+            "type": "Entertainment"
+        },
+        {
+            "id": 6,
+            "type": "Sports"
+        }
+    ],
+    "questions": [
+        {
+            "answer": "Mona Lisa",
+            "category": "2",
+            "difficulty": 3,
+            "id": 17,
+            "question": "La Giaconda is better known as what?"
+        },
+        {
+            "answer": "Blood",
+            "category": "1",
+            "difficulty": 4,
+            "id": 22,
+            "question": "Hematology is a branch of medicine involving the study of what?"
+        },
+        {
+            "answer": "Scarab",
+            "category": "4",
+            "difficulty": 4,
+            "id": 23,
+            "question": "Which dung beetle was worshipped by the ancient Egyptians?"
+        },
+        {
+            "answer": "hsjdh",
+            "category": "2",
+            "difficulty": 4,
+            "id": 24,
+            "question": "njasdkjskadjka"
+        },
+        {
+            "answer": "hi",
+            "category": "1",
+            "difficulty": 1,
+            "id": 32,
+            "question": "hello "
+        },
+        {
+            "answer": "michael Jackson",
+            "category": "4",
+            "difficulty": 2,
+            "id": 34,
+            "question": "who is the king of pop"
+        },
+       
+    ],
+    "success": true,
+    "total_questions": 17
+}
+```
+### `POST '/questions'`
+- General:
+  - Create a new question
+  - Sample http://localhost:5000/questions/ json = {
+            "answer": "Mona Lisa",
+            "category": "2",
+            "difficulty": 3,
+            "question": "La Giaconda is better known as what?"
+        }
 
+  ```json
+  {
+    "questions": [],
+    "success": true
+  }
+  ```
+  ### `DELETE '/questions/<int:question_id>'`
+- General:
+  - Delete question with the given id
+  - Sample http://localhost:5000/questions/7
+```json
+{
+  "deleted": 7,
+  "success": true
+}
+```
+
+### `POST '/questions'`
+- General:
+  - Searches base on searchTerm
+  - Returns currentCategory, list of questions, success value and the total numbers of questions related with searchTerm values
+  - Sample http://localhost:5000/questions json= {"searchTerm": "who"}
+
+```json
+  }
+  "currentCategories": null,
+  "questions":[
+        
+        {
+            "answer": "michael Jackson",
+            "category": "4",
+            "difficulty": 2,
+            "id": 34,
+            "question": "who is the king of pop"
+        },
+       
+    ],
+    "success": true,
+    "total_questions": 1
+  }
+```
+### `POST '/quizzes'`
+- General:
+  - Returns a random question and a success value
+  - Sample localhost:5000/quizzes/ json = {
+    "previous_questions": [8, 12],
+    "quiz_category": {"type": "Science", "id": "1"}
+}
+```json
+{
+    "question": {
+        "answer": "hi",
+        "category": "1",
+        "difficulty": 1,
+        "id": 45,
+        "question": "who is the king of pop"
+    },
+    "success": true
+}
+```
 ## Testing
 
 Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.
