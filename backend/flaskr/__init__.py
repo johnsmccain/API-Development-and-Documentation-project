@@ -14,7 +14,7 @@ from sqlalchemy import null
 from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
-
+# pagination helper function
 def paginate(request, selection):
     page = request.args.get("page", 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
@@ -56,7 +56,9 @@ def create_app(test_config=None):
     @app.route('/categories')
     def read_categories():
         try:
+            # quering categories from the database
             category = Category.query.all()
+
             formated_data = [data.format() for data in category]
             return jsonify({
                 'success': True,
@@ -80,18 +82,11 @@ def create_app(test_config=None):
     
     @app.route("/questions/")
     def read_questions():
+        
         selections = Question.query.all()
         formatData = paginate(request, selections)
         categories = Category.query.all()
         formatedCategories = [category.format() for category in  categories]
-        # currentCategory = Category.query.filter( formatData.category== id ).one_or_none()
-        # print(formatData)
-        # print(i for i in formatedCategories)
-        # print(categories)
-        # catObj ={}
-        # for i in formatedCategories:
-        #     catObj[i['id']] = i["type"]
-        # print(catObj)
         if len(formatData) == 0:
             abort(404)
         return jsonify({
