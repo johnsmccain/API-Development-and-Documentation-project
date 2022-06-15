@@ -29,7 +29,9 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    CORS(app)
+    CORS(app, resources={r"/*": {
+        "origin": "*"
+    }})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -111,18 +113,22 @@ def create_app(test_config=None):
     def delete_question(question_id):
         try:
             question = Question.query.filter(Question.id == question_id).one_or_none()
-            question.delete()
-            dqQuestions = Question.query.all()
-            questions =  paginate(request,  dqQuestions)
+            # question = Question.query.get(question_id)
+            if not question:
+                abort(404)
+            else:
 
-            return jsonify({
-                'success': True,
-                "deleted": question_id,
-                "questions": questions,
-                'total_questions': len(dqQuestions)
-                
-            })
-        except:
+                question.delete()
+                dqQuestions = Question.query.all()
+                questions =  paginate(request,  dqQuestions)
+                return jsonify({
+                    'success': True,
+                    "deleted": question_id,
+                    "questions": questions,
+                    'total_questions': len(dqQuestions)
+                    
+                })
+        except Exception:
             abort(404)
 
     """
@@ -138,20 +144,25 @@ def create_app(test_config=None):
     @app.route("/questions", methods=["POST"])
     def create_question():
         body = request.get_json()
-        new_answer = body.get('answer', None)
-        new_category = body.get('category', None)
-        new_question = body.get('question', None)
-        new_difficulty = body.get('difficulty', None)
         try:
-            question = Question(answer=new_answer, question=new_question, category=new_category, difficulty=new_difficulty)
+            new_answer = body.get('answer', None)
+            new_category = body.get('category', None)
+            new_question = body.get('question', None)
+            new_difficulty = body.get('difficulty', None)
 
+            question = Question(answer=new_answer, question=new_question, category=new_category, difficulty=new_difficulty)
+            if (question.question) is None:
+                abort(404)
+            
             question.insert()
+           
             return jsonify({
                 "success": True,
                 "questions": []
             })
+        
         except :
-            abort(405)
+            abort(400)
 
     """
     @TODO:
@@ -167,7 +178,7 @@ def create_app(test_config=None):
     def search_term():
         body = request.get_json()
         search_term = body.get("search_term", None)
-
+        
         selection = Question.query.filter(Question.question.ilike(f'%{search_term}')).all()
         formatedQuestion = paginate(request, selection )
         print(formatedQuestion)
@@ -249,6 +260,36 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "message": "bad request",
+            "status": 400
+        }), 400
 
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            'status': 404,
+            'success': True,
+            'message': 'resource not found',
+        })
+    
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        return jsonify({
+            'status': 405,
+            'success': False,
+            'message': 'method not found',
+        })
+    
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            'status': 422,
+            'success': False,
+            'message': 'unprocessable'
+        })
     return app
 
