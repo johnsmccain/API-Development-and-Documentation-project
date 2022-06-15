@@ -1,4 +1,5 @@
 
+# from nis import cat
 import os
 from unicodedata import category
 from flask import Flask, request, abort, jsonify
@@ -177,17 +178,23 @@ def create_app(test_config=None):
     @app.route("/questions/search", methods=["POST"])
     def search_term():
         body = request.get_json()
-        search_term = body.get("search_term", None)
-        
-        selection = Question.query.filter(Question.question.ilike(f'%{search_term}')).all()
-        formatedQuestion = paginate(request, selection )
-        print(formatedQuestion)
-        return jsonify({
-            "success": True,
-            "questions": formatedQuestion,
-            "total_questions": len(selection),
-            "current_category": current_category.type if current_category else "all"
-        })
+        search_term = body.get("searchTerm", None)
+        # print(search_term)
+        if search_term is not None:
+
+            selection = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+            formatedQuestion = paginate(request, selection )
+            if len(formatedQuestion) == 0:
+                abort(404)
+            # print(formatedQuestion)
+            return jsonify({
+                "success": True,
+                "questions": formatedQuestion,
+                "total_questions": len(selection),
+                "current_category": None
+            })
+        else:
+            abort(404)
 
     """
     @TODO:
@@ -230,31 +237,41 @@ def create_app(test_config=None):
     def quiz_questions():
 
         body = request.get_json()
-        previous_questions = body.get('previous_questions', None)
-        quiz_category = body.get('quiz_category', None)
-
-        
-        selection = Question.query.filter(Question.category == quiz_category['id']).all()
-        questions = paginate(request,selection)
-        current_question = {}
-        count = 0
-
-        for question in questions:
-            if len(previous_questions) > 0:
-                for prevQuest in previous_questions:
-                    # print(question['id'])
-                    if prevQuest != question['id']:
-                        current_question = question
-                        break
-            current_question = question
-            break
-                    
+        try:
+            previous_questions = body.get('previous_questions', None)
+            quiz_category = body.get('quiz_category', None)
             
+            questions =[]
+            if not quiz_category:
+                selection = Question.query.all()
+                questions = [question.format() for question in selection]
+                print("yes")
+            else:
+                print("no")
+                selection = Question.query.filter_by(category=str(quiz_category['id'])).all()
+                questions = [question.format() for question in selection]
+            
+            
+            sorted_questions = []
+            for question in questions:
+                if question['id'] not in previous_questions:
+                    sorted_questions.append(question)
 
-        return jsonify({
-            "success": True,
-            'question': current_question
-        })
+          
+            if len(sorted_questions) == 0:
+                return jsonify({
+                    'success': True
+                })
+
+            question = random.choice(sorted_questions)
+
+            return jsonify({
+                'success': True,
+                'question': question
+            })
+
+        except:
+            abort(404)
     """
     @TODO:
     Create error handlers for all expected errors
@@ -272,7 +289,7 @@ def create_app(test_config=None):
     def not_found(error):
         return jsonify({
             'status': 404,
-            'success': True,
+            'success': False,
             'message': 'resource not found',
         })
     
