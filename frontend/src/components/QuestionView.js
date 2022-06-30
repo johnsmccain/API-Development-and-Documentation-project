@@ -83,22 +83,26 @@ class QuestionView extends Component {
   };
 
   submitSearch = (searchTerm) => {
+    // console.log(searchTerm)
     $.ajax({
-      url: `/questions`, //TODO: update request URL
+      url: `/questions/search`, //TODO: update request URL
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json',
       data: JSON.stringify({ searchTerm: searchTerm }),
+      
       xhrFields: {
         withCredentials: true,
       },
       crossDomain: true,
       success: (result) => {
-        this.setState({
+        // console.log(result)
+        result.questions && this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
           currentCategory: result.current_category,
         });
+       
         return;
       },
       error: (error) => {
@@ -140,16 +144,18 @@ class QuestionView extends Component {
           <ul>
             {Object.keys(this.state.categories).map((id) => (
               <li
+              
                 key={id}
                 onClick={() => {
-                  this.getByCategory(id);
+                  this.getByCategory(String((Number(id)+1)));
                 }}
               >
-                {this.state.categories[id]}
+                {/* {console.log(String((Number(id)+1)))} */}
+                {this.state.categories[id].type}
                 <img
                   className='category'
-                  alt={`${this.state.categories[id].toLowerCase()}`}
-                  src={`${this.state.categories[id].toLowerCase()}.svg`}
+                  alt={`${this.state.categories[id].type.toLowerCase()}`}
+                  src={`${this.state.categories[id].type.toLowerCase()}.svg`}
                 />
               </li>
             ))}
@@ -159,6 +165,8 @@ class QuestionView extends Component {
         <div className='questions-list'>
           <h2>Questions</h2>
           {this.state.questions.map((q, ind) => (
+            
+       
             <Question
               key={q.id}
               question={q.question}
@@ -166,7 +174,8 @@ class QuestionView extends Component {
               category={this.state.categories[q.category]}
               difficulty={q.difficulty}
               questionAction={this.questionAction(q.id)}
-            />
+              />
+              
           ))}
           <div className='pagination-menu'>{this.createPagination()}</div>
         </div>

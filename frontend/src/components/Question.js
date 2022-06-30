@@ -15,15 +15,17 @@ class Question extends Component {
 
   render() {
     const { question, answer, category, difficulty } = this.props;
+    // console.log(category.type)
     return (
       <div className='Question-holder'>
         <div className='Question'>{question}</div>
         <div className='Question-status'>
           <img
             className='category'
-            alt={`${category.toLowerCase()}`}
-            src={`${category.toLowerCase()}.svg`}
+            alt={`${category && category.type.toLowerCase()}`}
+            src={`${category && category.type.toLowerCase()}.svg`}
           />
+
           <div className='difficulty'>Difficulty: {difficulty}</div>
           <img
             src='delete.png'
